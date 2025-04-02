@@ -1,4 +1,3 @@
 .DS_Store
 *.drawio.bkp
-create-kubecfg.sh
 k8s-users

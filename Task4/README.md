@@ -1,7 +1,5 @@
 # Задание 4. Защита доступа к кластеру Kubernetes
 
-
-
 ## Роли
 
 | № | Роль | Полномочия в Kubernetes | Группы пользователей |
@@ -28,8 +26,54 @@
 
 ## Создание пользователей
 
+Сначала необходимо создать ключи и запросы на создание сертификатов Certificate Sign Request (CSR).
 
+```sh
+chmod +x ./create-keys.sh
+./create-keys.sh
 
+# должна создаться директории с файлами
+# проверим, что файлы ключей и CSR создались
+$ ls -alh ./k8s-users/
+```
+
+Затем k8s должен подписать сертификаты
+
+```sh
+chmod +x ./sign-csr.sh
+./sign-csr.sh
+
+# увидим, что объекты CSR были созданы в k8s, а затем подтверждены (подписаны)
+# здесь же происходит извлечение подписанных сертификатов 
+# и сохранение в файлы *.crt в директории ./k8s-users/
+certificatesigningrequest.certificates.k8s.io/product-owner-csr created
+certificatesigningrequest.certificates.k8s.io/product-owner-csr approved
+certificatesigningrequest.certificates.k8s.io/business-analyst-csr created
+certificatesigningrequest.certificates.k8s.io/business-analyst-csr approved
+certificatesigningrequest.certificates.k8s.io/developer-csr created
+certificatesigningrequest.certificates.k8s.io/developer-csr approved
+certificatesigningrequest.certificates.k8s.io/support-engineer-csr created
+certificatesigningrequest.certificates.k8s.io/support-engineer-csr approved
+certificatesigningrequest.certificates.k8s.io/devops-engineer-csr created
+certificatesigningrequest.certificates.k8s.io/devops-engineer-csr approved
+certificatesigningrequest.certificates.k8s.io/security-engineer-csr created
+certificatesigningrequest.certificates.k8s.io/security-engineer-csr approved
+certificatesigningrequest.certificates.k8s.io/manager-csr created
+certificatesigningrequest.certificates.k8s.io/manager-csr approved
+certificatesigningrequest.certificates.k8s.io/super-admin-csr created
+certificatesigningrequest.certificates.k8s.io/super-admin-csr approved
+```
+
+Создаем файлы kubeconfig для каждого пользователя, 
+файлы конфигурации необходимы пользователям для подключения к k8s API
+
+```sh
+chmod +x ./create-kubecfg.sh
+./create-kubecfg.sh \
+  --cluster-name <MY_MINIKUBE_NAME> \
+  --endpoint <MY_MINIKUBE_API> \
+  --ca-cert <MY_MINIKUBE_CA.CRT>
+```
 
 ## Манифесты k8s
 
@@ -39,5 +83,26 @@
  - роли (Role)
  - привязки роли к пользователю (RoleBinding)
 
+Применим манифесты
+
+```sh
+kubectl apply -f ./k8s-manifests/business-analyst-role.yaml
+kubectl apply -f ./k8s-manifests/devops-engineer-role.yaml
+kubectl apply -f ./k8s-manifests/product-owner-role.yaml
+kubectl apply -f ./k8s-manifests/super-admin-role.yaml
+kubectl apply -f ./k8s-manifests/developer-role.yaml
+kubectl apply -f ./k8s-manifests/manager-role.yaml
+kubectl apply -f ./k8s-manifests/security-engineer-role.yaml
+kubectl apply -f ./k8s-manifests/support-engineer.yaml
+```
+
 ## Проверка
 
+```sh
+$ kubectl auth can-i get pods --as=developer -n development
+yes
+$ kubectl auth can-i delete nodes --as=developer
+Warning: resource 'nodes' is not namespace scoped
+
+no
+```
