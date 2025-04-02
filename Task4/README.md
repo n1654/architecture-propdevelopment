@@ -98,6 +98,8 @@ kubectl apply -f ./k8s-manifests/support-engineer.yaml
 
 ## Проверка
 
+Выборочно проверим роли и привилегии
+
 ```sh
 $ kubectl auth can-i get pods --as=developer -n development
 yes
