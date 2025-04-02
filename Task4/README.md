@@ -13,6 +13,13 @@
 | 7 | Инженер ИБ | В рамках кластера. Доступ к Secrets, RBAC, аудит безопасности. | security-engineer |
 | 8 | Менеджер | В рамках неймспейса. Доступ на чтение ресурсов внутри неймспейса. | manager |
 
+## Скриты
+
+ - [create-keys.sh](./create-keys.sh)
+ - [sign-csr.sh](./sign-csr.sh)
+ - [create-kubecfg.sh](./create-kubecfg.sh)
+
+## Манифесты
 
  - [Манифест для роли суперадмина](./k8s-manifests/super-admin-role.yaml)
  - [Манифест для роли владельца продукта](./k8s-manifests/product-owner-role.yaml)
@@ -24,9 +31,13 @@
  - [Манифест для роли менеджера](./k8s-manifests/security-engineer-role.yaml)
 
 
+
 ## Создание пользователей
 
 Сначала необходимо создать ключи и запросы на создание сертификатов Certificate Sign Request (CSR).
+
+[create-keys.sh](./create-keys.sh)
+
 
 ```sh
 chmod +x ./create-keys.sh
@@ -38,6 +49,8 @@ $ ls -alh ./k8s-users/
 ```
 
 Затем k8s должен подписать сертификаты
+
+[sign-csr.sh](./sign-csr.sh)
 
 ```sh
 chmod +x ./sign-csr.sh
@@ -66,6 +79,8 @@ certificatesigningrequest.certificates.k8s.io/super-admin-csr approved
 
 Создаем файлы kubeconfig для каждого пользователя, 
 файлы конфигурации необходимы пользователям для подключения к k8s API
+
+[create-kubecfg.sh](./create-kubecfg.sh)
 
 ```sh
 chmod +x ./create-kubecfg.sh
